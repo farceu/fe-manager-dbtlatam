@@ -72,12 +72,14 @@ export default function SignInViewPage() {
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
+              <Link href='/dashboard'>
               <button
                 type='submit'
                 className='w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2'
               >
                 Iniciar sesión
               </button>
+              </Link>
             </form>
           </div>
           <p className='text-muted-foreground px-8 text-center text-sm'>
