@@ -16,6 +16,7 @@ import useLogin from "@/hooks/useLogin";
 import { cn } from "@/lib/utils";
 import { HTMLAttributes } from "react";
 import AuthLayout from "../AuthLayout";
+import { Loader } from "lucide-react";
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement>;
 
@@ -77,7 +78,14 @@ export default function Login({ className, ...props }: UserAuthFormProps) {
                 </Link>
               </div>
               <Button className="bg-primary hover:bg-primary/80 text-white" disabled={isLoading}>
-                Iniciar sesión
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader className="animate-spin" />
+                    Iniciando sesión...
+                  </span>
+                ) : (
+                  "Iniciar sesión"
+                )}
               </Button>
             </div>
           </form>

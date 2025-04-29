@@ -14,22 +14,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: {},
       },
       async authorize(credentials) {
-        let user = null;
-        debugger;
-        const response: any = await signInService(
-          credentials.email as string,
-          credentials.password as any
-        );
-        const userProfile: any = await getUserProfile(response.token);
+        try {
+          const response = await signInService(
+            credentials.email as string,
+            credentials.password as any
+          );
 
-        user = { ...userProfile, token: response.token };
-        console.log(user);
+          const userProfile = await getUserProfile(response.token);
+          const user = { ...userProfile, token: response.token };
 
-        if (!user) {
-          throw new Error("Invalid credentials.");
+          if (!user) {
+            throw new Error("Credenciales inválidas");
+          }
+
+          return user;
+        } catch (error: any) {
+          console.log("ERROR", error);
+          throw new Error(error);
         }
-
-        return user;
       },
     }),
   ],

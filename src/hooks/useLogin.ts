@@ -1,7 +1,7 @@
 // import { signIn } from '@/services/auth';
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
+import { signIn, SignInResponse } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -37,25 +37,42 @@ const useLogin = () => {
     setIsLoading(true);
 
     try {
-      await signIn("credentials", { redirectTo: "/dashboard", ...data })
-        .then(() => {
-          debugger;
-          toast.success("Sign in successfully", {
-            description: "Welcome back",
-          });
-          form.reset();
-          router.push("/dashboard");
-        })
-        .catch((error: any) => {
-          console.log("ERROR", error);
-          toast.error(error?.message);
-        })
-        .finally(() => {
-          debugger;
-          setIsLoading(false);
+      const result = (await signIn("credentials", {
+        redirectTo: "/dashboard",
+        ...data,
+        redirect: false,
+      })) as unknown as SignInResponse;
+
+      if (result?.error) {
+        // Si el error viene del endpoint, mostramos el mensaje específico
+        // const errorMessage = result.error.includes("Invalid password or email")
+        //   ? "Email o contraseña incorrectos"
+        //   : result.error;
+
+        toast.error("Error de autenticación", {
+          description: "Valida tus credenciales",
         });
+        return;
+      }
+
+      // Si no hay error, procedemos con la redirección
+      toast.success("Inicio de sesión exitoso", {
+        description: "Bienvenido/a",
+      });
+      form.reset();
+      router.push("/dashboard");
     } catch (error: any) {
-      toast.error(error?.message);
+      console.log("ERROR", error);
+      // Si el error viene del endpoint, mostramos el mensaje específico
+      // const errorMessage = error.message.includes("Invalid password or email")
+      //   ? "Email o contraseña incorrectos"
+      //   : error.message || "Por favor verifica tus credenciales";
+
+      toast.error("Error de autenticación", {
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -21,13 +21,9 @@ export const signIn = async (signInData: SignInProps) => {
 
   const data = await response.json();
 
-  console.log(data);
+  if (!response.ok) {
+    throw new Error(data.message || "Error de autenticación");
+  }
 
-  // CHANGE TO AXIOS
-
-  // if (error) {
-  //   throw new Error(error.message);
-  // }
-
-  return {};
+  return data;
 };

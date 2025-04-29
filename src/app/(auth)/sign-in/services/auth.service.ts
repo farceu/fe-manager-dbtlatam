@@ -1,14 +1,27 @@
 export const signIn = async (email: string, password: string) => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/auth/login`, {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  debugger;
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/auth/login`, {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  return response.json();
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorMessage = data.message || "Error en la autenticación";
+      throw new Error(errorMessage);
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Error desconocido al iniciar sesión");
+  }
 };
 
 export const getUserProfile = async (token: string) => {
