@@ -17,10 +17,11 @@ const formSchema = z.object({
     .min(1, {
       message: "Please enter your password",
     })
-    .min(7, {
-      message: "Password must be at least 7 characters long",
+    .min(6, {
+      message: "Password must be at least 6 characters long",
     }),
 });
+
 const useLogin = () => {
   const router = useRouter();
   const { setIsLoading, isLoading } = useAuthLayout();
@@ -38,13 +39,19 @@ const useLogin = () => {
     try {
       await signIn("credentials", { redirectTo: "/dashboard", ...data })
         .then(() => {
+          debugger;
           toast.success("Sign in successfully", {
             description: "Welcome back",
           });
           form.reset();
           router.push("/dashboard");
         })
+        .catch((error: any) => {
+          console.log("ERROR", error);
+          toast.error(error?.message);
+        })
         .finally(() => {
+          debugger;
           setIsLoading(false);
         });
     } catch (error: any) {
