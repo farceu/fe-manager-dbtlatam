@@ -38,7 +38,7 @@ const useLogin = () => {
 
     try {
       const result = (await signIn("credentials", {
-        redirectTo: "/dashboard",
+        redirectTo: "/dashboard/overview",
         ...data,
         redirect: false,
       })) as unknown as SignInResponse;
@@ -60,7 +60,7 @@ const useLogin = () => {
         description: "Bienvenido/a",
       });
       form.reset();
-      router.push("/dashboard");
+      router.push("/dashboard/overview");
     } catch (error: any) {
       console.log("ERROR", error);
       // Si el error viene del endpoint, mostramos el mensaje específico

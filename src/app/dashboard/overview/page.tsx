@@ -6,6 +6,8 @@ import { topNav } from "../data";
 import { useDashboard } from "@/stores/dashboard/dashboardStore";
 import { Main } from "../components/main";
 import { Button } from "@/components/ui/button";
+import TitleSection from "../components/title-section";
+import { ChartArea, LayoutDashboard, Square, UserIcon } from "lucide-react";
 const OverviewPage = () => {
   const { defaultOpen } = useDashboard();
   return (
@@ -23,17 +25,18 @@ const OverviewPage = () => {
       </Header>
       {/* <AppSidebar /> */}
       <Main>
-        <div className="mb-2 flex flex-wrap items-center justify-between space-y-2 gap-x-4">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
-            <p className="text-muted-foreground">
-              Aquí puedes ver un resumen de tus deudas y pagos.
-            </p>
-          </div>
-          TASK
-        </div>
+        <TitleSection
+          title="Overview"
+          description="Aquí puedes ver un resumen de tus deudas y pagos."
+          icon={<LayoutDashboard color="white" />}
+          subDescription="Dashboard"
+        />
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-          DATATABLE
+          <div className="w-full h-[50000px]">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam quia ipsam hic voluptate
+            soluta. Ex ratione provident amet animi atque, facilis dolorem odit dignissimos vitae
+            nemo! Quos quae non sit?
+          </div>
         </div>
       </Main>
     </>

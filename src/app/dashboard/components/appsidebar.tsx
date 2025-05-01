@@ -1,13 +1,25 @@
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import React from "react";
 import { sidebarData } from "../data";
 import { NavGroup } from "./nav-group";
 import { ProfileDropdown } from "./profile-dropdown";
+import { Origami } from "lucide-react";
+
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
+  const { state } = useSidebar();
   return (
     <Sidebar collapsible="icon" variant="floating" {...props}>
       <SidebarHeader className="bg-primary text-white rounded-md rounded-b-none border-none">
-        LOGO
+        <div className="flex items-center justify-center py-2">
+          <Origami size={32} />
+          {state === "expanded" && <span className="text-white text-3xl font-black">Quironix</span>}
+        </div>
       </SidebarHeader>
       <SidebarContent className="bg-primary text-white">
         {sidebarData.navGroups.map(props => (
