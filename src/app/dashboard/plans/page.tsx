@@ -1,15 +1,29 @@
 "use client";
 import React from "react";
 import Header from "../components/header";
-import TopNav from "../components/topnav";
-import { topNav } from "../data";
-import { useDashboard } from "@/stores/dashboard/dashboardStore";
 import { Main } from "../components/main";
 import { Button } from "@/components/ui/button";
 import TitleSection from "../components/title-section";
-import { ChartArea, FileText, LayoutDashboard, Square, UserIcon } from "lucide-react";
+import { FileText } from "lucide-react";
+import CardPlan from "@/app/dashboard/plans/components/card-plan";
 const OverviewPage = () => {
-  const { defaultOpen } = useDashboard();
+  const plans = [
+    {
+      id: "1",
+      title: "Plan free",
+      description: "description",
+      price: "Gratis",
+      features: ["Acceso básico", "Soporte por email"],
+    },
+    {
+      id: "2",
+      title: "plan1",
+      description:
+        "lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+      price: 100,
+      features: ["feature1", "feature2", "feature3", "feature4", "feature5", "feature6"],
+    },
+  ];
   return (
     <>
       <Header fixed>
@@ -31,9 +45,15 @@ const OverviewPage = () => {
         />
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
           <div className="w-full h-full">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam quia ipsam hic voluptate
-            soluta. Ex ratione provident amet animi atque, facilis dolorem odit dignissimos vitae
-            nemo! Quos quae non sit?
+            <div className="grid grid-cols-4 gap-4">
+              {[...Array(4)].map((_, index) => (
+                <CardPlan
+                  key={plans[index]?.id || `empty-${index}`}
+                  plan={plans[index]}
+                  isEmpty={!plans[index]}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </Main>
