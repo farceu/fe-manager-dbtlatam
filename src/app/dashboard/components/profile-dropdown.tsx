@@ -59,23 +59,16 @@ export const ProfileDropdown = () => {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link href="/settings">
-              Profile
-              <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+              Perfil
+              {/* <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut> */}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/settings">
-              Billing
-              <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+              Configuraciones
+              {/* <DropdownMenuShortcut>⌘B</DropdownMenuShortcut> */}
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/settings">
-              Settings
-              <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>New Team</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()}>Cerrar sesión</DropdownMenuItem>
