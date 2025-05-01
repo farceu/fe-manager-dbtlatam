@@ -17,11 +17,13 @@ import { cn } from "@/lib/utils";
 import { HTMLAttributes } from "react";
 import AuthLayout from "../AuthLayout";
 import { Loader } from "lucide-react";
+import { useAuthLayout } from "@/stores/authLayout";
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement>;
 
 export default function Login({ className, ...props }: UserAuthFormProps) {
   const { onSubmit, form, isLoading } = useLogin();
+  const { isLoading: isLoadingAuthLayout } = useAuthLayout();
 
   return (
     <AuthLayout>
@@ -78,7 +80,7 @@ export default function Login({ className, ...props }: UserAuthFormProps) {
                 </Link>
               </div>
               <Button className="bg-primary hover:bg-primary/80 text-white" disabled={isLoading}>
-                {isLoading ? (
+                {isLoadingAuthLayout ? (
                   <span className="flex items-center gap-2">
                     <Loader className="animate-spin" />
                     Iniciando sesión...
