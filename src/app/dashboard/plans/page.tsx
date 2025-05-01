@@ -7,7 +7,7 @@ import { useDashboard } from "@/stores/dashboard/dashboardStore";
 import { Main } from "../components/main";
 import { Button } from "@/components/ui/button";
 import TitleSection from "../components/title-section";
-import { ChartArea, LayoutDashboard, Square, UserIcon } from "lucide-react";
+import { ChartArea, FileText, LayoutDashboard, Square, UserIcon } from "lucide-react";
 const OverviewPage = () => {
   const { defaultOpen } = useDashboard();
   return (
@@ -24,10 +24,10 @@ const OverviewPage = () => {
       </Header>
       <Main>
         <TitleSection
-          title="Overview"
+          title="Planes"
           description="Aquí puedes ver un resumen de tus deudas y pagos."
-          icon={<LayoutDashboard color="white" />}
-          subDescription="Dashboard"
+          icon={<FileText color="white" />}
+          subDescription="Planes y suscripciones"
         />
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
           <div className="w-full h-full">

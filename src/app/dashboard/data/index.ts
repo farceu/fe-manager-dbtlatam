@@ -90,11 +90,11 @@ export const sidebarData: SidebarData = {
           items: [
             {
               title: "Planes",
-              url: "/plans",
+              url: "/dashboard/plans",
             },
             {
               title: "Suscripciones",
-              url: "/subscriptions",
+              url: "/dashboard/subscriptions",
             },
           ],
         },
@@ -104,21 +104,21 @@ export const sidebarData: SidebarData = {
           items: [
             {
               title: "Admin. Usuarios",
-              url: "/admin-users",
+              url: "/dashboard/admin-users",
             },
             {
               title: "Admin. Roles",
-              url: "/admin-roles",
+              url: "/dashboard/admin-roles",
             },
             {
               title: "Historial de acciones",
-              url: "/admin-actions-history",
+              url: "/dashboard/admin-actions-history",
             },
           ],
         },
         {
           title: "Clientes",
-          url: "/clients",
+          url: "/dashboard/clients",
           // badge: "3",
           icon: IconHeartHandshake,
         },

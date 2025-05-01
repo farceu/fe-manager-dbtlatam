@@ -10,7 +10,7 @@ export const Main = ({ fixed, ...props }: MainProps) => {
   return (
     <main
       className={cn(
-        "peer-[.header-fixed]/header:mt-20 pr-2 overflow-y-auto overflow-x-hidden",
+        "peer-[.header-fixed]/header:mt-20 pr-2 overflow-y-auto overflow-x-hidden p-10",
         "py-4",
         fixed && "fixed-main flex grow flex-col overflow-hidden"
       )}
