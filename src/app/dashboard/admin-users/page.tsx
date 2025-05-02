@@ -14,6 +14,8 @@ import Search from "./components/search";
 import UsersTable from "./components/users-table";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import DialogForm from "../components/dialog-form";
+import UserForm from "./components/user-form";
 
 const UsersPage = () => {
   const { data: session, status: sessionStatus }: any = useSession();
@@ -40,6 +42,14 @@ const UsersPage = () => {
     console.log("Reinvitar usuario:", user);
   };
 
+  const handleUserSubmit = async (data: any) => {
+    try {
+      await useUserStore.getState().addUser(data, session?.token);
+    } catch (error) {
+      console.error("Error al crear usuario:", error);
+    }
+  };
+
   return (
     <>
       <Header fixed>
@@ -63,9 +73,18 @@ const UsersPage = () => {
           <div className="w-full h-full">
             <section className="flex items-center justify-between mb-4">
               <Search />
-              <Button className="bg-orange-500 text-white hover:bg-orange-400 cursor-pointer">
-                <UsersIcon className="mr-2" /> Crear usuario
-              </Button>
+              <DialogForm
+                title="Crear usuario"
+                description="Completa los campos obligatorios para crear un nuevo usuario."
+                onSubmit={handleUserSubmit}
+                trigger={
+                  <Button className="bg-orange-500 text-white hover:bg-orange-400 cursor-pointer">
+                    <UsersIcon className="mr-2" /> Crear usuario
+                  </Button>
+                }
+              >
+                <UserForm onSubmit={handleUserSubmit} />
+              </DialogForm>
             </section>
             <Card className="p-4">
               {loading ? (

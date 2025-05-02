@@ -5,7 +5,7 @@ export interface User {
   email: string;
   phone_number: string;
   type: string;
-  roles: Role[];
+  roles: string[];
   created_at?: string;
   updated_at?: string;
 }

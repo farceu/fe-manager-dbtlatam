@@ -43,3 +43,10 @@ export const reinviteUser = async (email: string, accessToken: string) => {
   });
   return response.json();
 };
+
+export const getRoles = async (accessToken: string) => {
+  const response = await fetch(`${API_URL}/admin/roles`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return response.json();
+};
