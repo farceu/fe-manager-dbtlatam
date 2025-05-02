@@ -131,7 +131,7 @@ const CardPlan = ({ plan, isEmpty }: CardPlanProps) => {
             {plan.name}
           </CardTitle>
           <CardTitle className="text-md font-extrabold text-primary uppercase">
-            ${plan.monthly_price}
+            ${new Intl.NumberFormat("es-ES").format(plan.monthly_price as number)}
           </CardTitle>
           <CardDescription className="py-2">{plan.description}</CardDescription>
           <ul className="mt-2">

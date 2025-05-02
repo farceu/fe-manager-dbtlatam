@@ -7,7 +7,7 @@ import { useDashboard } from "@/stores/dashboard/dashboardStore";
 import { Main } from "../components/main";
 import { Button } from "@/components/ui/button";
 import TitleSection from "../components/title-section";
-import { Edit, Trash2, UsersIcon } from "lucide-react";
+import { Edit, Plus, Puzzle, Trash2, UsersIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import Search from "../admin-users/components/search";
@@ -54,7 +54,12 @@ const RolesPage = () => {
                   />
                 </div>
                 <div className="w-2/3">
-                  <Search placeholder="Buscar por nombre" />
+                  <div className="flex justify-between items-center">
+                    <Search placeholder="Buscar por nombre" />
+                    <Button className="bg-orange-500 text-white hover:bg-orange-400">
+                      <Puzzle /> Crear rol
+                    </Button>
+                  </div>
                   <div className="mt-5 p-3 border border-gray-200 rounded-lg">
                     <Table>
                       <TableHeader>
