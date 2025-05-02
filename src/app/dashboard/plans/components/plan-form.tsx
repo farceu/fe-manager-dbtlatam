@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Plan, Resource } from "../services/types";
 import { usePlanStore } from "../store/indext";
+import { toast } from "sonner";
 
 const planFormSchema = z.object({
   name: z.string().min(3, "Campo requerido").max(50, "Máximo 50 caracteres"),
@@ -74,11 +75,17 @@ const PlanForm = ({ defaultValues, onSubmit }: PlanFormProps) => {
       } else {
         const response = await create(planData, session?.token);
         addPlan(response);
+        toast.success("Éxito", {
+          description: "El plan se ha creado correctamente.",
+        });
       }
 
       await refreshPlans(session?.token);
     } catch (error) {
       console.error("Error al guardar el plan:", error);
+      toast.error("Error", {
+        description: "No se pudo crear el plan. Por favor, intente nuevamente.",
+      });
     }
   };
 

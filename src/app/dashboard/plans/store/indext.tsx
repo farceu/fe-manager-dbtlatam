@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { Plan } from "../services/types";
 import { getAll } from "../services";
+import { toast } from "sonner";
 
 interface PlanStore {
   plans: Plan[];
@@ -30,6 +31,9 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
     } catch (error) {
       console.error("Error al actualizar la lista de planes:", error);
       set({ isLoading: false });
+      toast.error("Error", {
+        description: "No se pudo cargar la lista de planes. Por favor, intente nuevamente.",
+      });
     }
   },
 }));

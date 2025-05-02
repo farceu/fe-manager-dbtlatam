@@ -18,6 +18,7 @@ import { usePlanStore } from "../store/indext";
 import { useSession } from "next-auth/react";
 import { update, deletePlan } from "../services";
 import DialogConfirm from "../../components/dialog-confirm";
+import { toast } from "sonner";
 
 interface CardPlanProps {
   plan?: Plan;
@@ -37,8 +38,14 @@ const CardPlan = ({ plan, isEmpty }: CardPlanProps) => {
       updatePlan(plan.id, updatedPlan);
       await refreshPlans(session?.token);
       setIsEditDialogOpen(false);
+      toast.success("Éxito", {
+        description: "El plan se ha actualizado correctamente.",
+      });
     } catch (error) {
       console.error("Error al actualizar el plan:", error);
+      toast.error("Error", {
+        description: "No se pudo actualizar el plan. Por favor, intente nuevamente.",
+      });
     }
   };
 
@@ -47,8 +54,14 @@ const CardPlan = ({ plan, isEmpty }: CardPlanProps) => {
       if (!plan?.id) return;
       await deletePlan(plan.id, session?.token);
       await refreshPlans(session?.token);
+      toast.success("Éxito", {
+        description: "El plan se ha eliminado correctamente.",
+      });
     } catch (error) {
       console.error("Error al eliminar el plan:", error);
+      toast.error("Error", {
+        description: "No se pudo eliminar el plan. Por favor, intente nuevamente.",
+      });
     }
   };
 
