@@ -9,25 +9,19 @@ import CardPlan from "@/app/dashboard/plans/components/card-plan";
 import { Plan } from "./services/types";
 import { useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAll } from "./services";
+import { usePlanStore } from "./store/indext";
 
 const PlansPage = () => {
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { data: session, status: sessionStatus }: any = useSession();
-
+  const { refreshPlans, plans, isLoading } = usePlanStore();
   useEffect(() => {
-    setIsLoading(true);
-
     if (session?.token) {
       fetchPlans();
     }
   }, [sessionStatus, session]);
 
   const fetchPlans = async () => {
-    const plansData = await getAll(session?.token);
-    setPlans(plansData);
-    setIsLoading(false);
+    refreshPlans(session?.token);
   };
 
   const emptyCardsCount = plans.length < 4 ? 4 - plans.length : 0;

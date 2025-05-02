@@ -96,7 +96,7 @@ const CardPlan = ({ plan, isEmpty }: CardPlanProps) => {
       </CardHeader>
       <CardContent className="m-0">
         <>
-          <CardTitle className="text-2xl font-black text-[#FF8113] capitalize">
+          <CardTitle className="text-2xl font-black text-[#FF8113] uppercase">
             {plan.name}
           </CardTitle>
           <CardTitle className="text-md font-extrabold text-primary uppercase">

@@ -66,11 +66,8 @@ const PlanForm = ({ defaultValues, onSubmit }: PlanFormProps) => {
       const { id, created_at, updated_at, ...restData } = data;
       const planData = {
         ...restData,
-        system_resources: (data.system_resources || []).map(id => ({
-          id,
-          name: resources.find(r => r.id === id)?.name || "",
-        })),
-      } as Plan;
+        system_resources: data.system_resources || [],
+      } as unknown as Plan;
 
       if (onSubmit) {
         await onSubmit(planData);

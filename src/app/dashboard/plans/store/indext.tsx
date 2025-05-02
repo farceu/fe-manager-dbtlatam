@@ -4,6 +4,7 @@ import { getAll } from "../services";
 
 interface PlanStore {
   plans: Plan[];
+  isLoading: boolean;
   setPlans: (plans: Plan[]) => void;
   updatePlan: (planId: string, updatedPlan: Partial<Plan>) => void;
   getPlanById: (planId: string) => Plan | undefined;
@@ -13,6 +14,7 @@ interface PlanStore {
 
 export const usePlanStore = create<PlanStore>((set, get) => ({
   plans: [],
+  isLoading: true,
   setPlans: (plans: Plan[]) => set({ plans }),
   updatePlan: (planId: string, updatedPlan: Partial<Plan>) =>
     set(state => ({
@@ -22,11 +24,12 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
   addPlan: (plan: Plan) => set(state => ({ plans: [...state.plans, plan] })),
   refreshPlans: async (accessToken: string) => {
     try {
+      set({ isLoading: true });
       const plans = await getAll(accessToken);
-      debugger;
-      set({ plans });
+      set({ plans, isLoading: false });
     } catch (error) {
       console.error("Error al actualizar la lista de planes:", error);
+      set({ isLoading: false });
     }
   },
 }));
