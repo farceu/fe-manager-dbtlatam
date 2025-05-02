@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { SearchIcon } from "lucide-react";
 
-const Search = () => {
+const Search = ({ placeholder }: { placeholder?: string }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -24,7 +24,7 @@ const Search = () => {
       <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
         className="pl-9"
-        placeholder="Buscar por nombre, apellido o correo..."
+        placeholder={placeholder || "Buscar por nombre, apellido o correo..."}
         onChange={e => handleSearch(e.target.value)}
         defaultValue={searchParams.get("search")?.toString()}
       />
