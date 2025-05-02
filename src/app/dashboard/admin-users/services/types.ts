@@ -1,0 +1,17 @@
+export interface User {
+  id?: string;
+  name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  type: string;
+  roles: Role[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
+}
