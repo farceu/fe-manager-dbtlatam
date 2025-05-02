@@ -16,7 +16,8 @@ import PlanForm from "./plan-form";
 import { Plan } from "../services/types";
 import { usePlanStore } from "../store/indext";
 import { useSession } from "next-auth/react";
-import { update } from "../services";
+import { update, deletePlan } from "../services";
+import DialogConfirm from "../../components/dialog-confirm";
 
 interface CardPlanProps {
   plan?: Plan;
@@ -38,6 +39,16 @@ const CardPlan = ({ plan, isEmpty }: CardPlanProps) => {
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error("Error al actualizar el plan:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      if (!plan?.id) return;
+      await deletePlan(plan.id, session?.token);
+      await refreshPlans(session?.token);
+    } catch (error) {
+      console.error("Error al eliminar el plan:", error);
     }
   };
 
@@ -89,9 +100,16 @@ const CardPlan = ({ plan, isEmpty }: CardPlanProps) => {
               <PlanForm defaultValues={plan} onSubmit={handleEdit} />
             </DialogContent>
           </Dialog>
-          <Button variant="outline" size="icon">
-            <Trash2 className="text-primary" />
-          </Button>
+          <DialogConfirm
+            title="¿Está seguro que desea eliminar el plan?"
+            description="Al eliminar el plan, perderá toda la configuración asignada a este plan."
+            triggerButton={
+              <Button variant="outline" size="icon">
+                <Trash2 className="text-primary" />
+              </Button>
+            }
+            onConfirm={handleDelete}
+          />
         </div>
       </CardHeader>
       <CardContent className="m-0">

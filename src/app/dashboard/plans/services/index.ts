@@ -41,3 +41,13 @@ export const getSystemResources = async (accessToken: string) => {
   });
   return response.json();
 };
+
+export const deletePlan = async (planId: string, accessToken: string) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/system-plans/${planId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.json();
+};
