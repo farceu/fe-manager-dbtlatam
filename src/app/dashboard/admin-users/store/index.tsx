@@ -26,7 +26,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
   setSearchTerm: term => set({ searchTerm: term }),
 
   fetchUsers: async (accessToken: string) => {
-    set({ loading: true, error: null });
+    set({ loading: true, error: null, users: [] });
     try {
       const users = await getAll(accessToken);
       set({ users, loading: false });
@@ -62,7 +62,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       await deleteUser(id, accessToken);
-      set(state => ({ users: state.users.filter(u => u.id !== id) }));
+      get().fetchUsers(accessToken);
     } catch (error) {
       console.error("Error al eliminar usuario:", error);
       set({ error: "Error al eliminar usuario", loading: false });

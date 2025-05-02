@@ -24,7 +24,12 @@ const userFormSchema = z.object({
   last_name: z.string().min(3, "Campo requerido").max(50, "Máximo 50 caracteres"),
   email: z.string().email("Email inválido"),
   phone_number: z.string().min(8, "Campo requerido").max(15, "Máximo 15 caracteres"),
-  type: z.string().min(1, "Campo requerido"),
+  type: z
+    .string()
+    .min(1, "Campo requerido")
+    .refine(value => ["SUPER_ADMIN", "NORMAL"].includes(value), {
+      message: "Debe seleccionar un rol válido",
+    }),
   roles: z.array(z.string()).min(1, "Debe seleccionar al menos un rol"),
 });
 
@@ -79,7 +84,11 @@ const UserForm = ({ defaultValues, onSubmit }: UserFormProps) => {
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="w-full space-y-6">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="w-full space-y-6"
+        autoComplete="off"
+      >
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-2 gap-4">
             <FormField
@@ -158,8 +167,8 @@ const UserForm = ({ defaultValues, onSubmit }: UserFormProps) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="admin">Administrador</SelectItem>
-                    <SelectItem value="user">Usuario</SelectItem>
+                    <SelectItem value="SUPER_ADMIN">Administrador</SelectItem>
+                    <SelectItem value="NORMAL">Usuario</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -172,9 +181,10 @@ const UserForm = ({ defaultValues, onSubmit }: UserFormProps) => {
             </Label>
             <div className="flex flex-col gap-2 mt-2">
               {roles.map(role => (
-                <label key={role.id} className="flex items-center gap-2">
+                <div key={`role-${role.id}`} className="flex items-center gap-2">
                   <input
                     type="checkbox"
+                    id={`role-checkbox-${role.id}`}
                     checked={form.watch("roles")?.includes(role.id)}
                     onChange={e => {
                       const currentRoles = form.getValues("roles") || [];
@@ -188,8 +198,8 @@ const UserForm = ({ defaultValues, onSubmit }: UserFormProps) => {
                       }
                     }}
                   />
-                  {role.name}
-                </label>
+                  <label htmlFor={`role-checkbox-${role.id}`}>{role.name}</label>
+                </div>
               ))}
             </div>
             {form.formState.errors.roles && (

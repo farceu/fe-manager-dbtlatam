@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { User } from "../services/types";
 import { useSearchParams } from "next/navigation";
+import DialogConfirm from "../../components/dialog-confirm";
 
 interface UsersTableProps {
   users: User[];
@@ -68,9 +69,16 @@ const UsersTable = ({ users, onEdit, onDelete, onReinvite }: UsersTableProps) =>
                 <Button variant="ghost" size="icon" onClick={() => onEdit(user)} title="Editar">
                   <Edit className="text-primary" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => onDelete(user)} title="Eliminar">
-                  <Trash2 className="text-primary" />
-                </Button>
+                <DialogConfirm
+                  title="¿Está seguro que desea eliminar el usuario?"
+                  description="Al eliminar el usuario, perderá toda la información asociada a este usuario."
+                  triggerButton={
+                    <Button variant="ghost" size="icon" title="Eliminar">
+                      <Trash2 className="text-primary" />
+                    </Button>
+                  }
+                  onConfirm={() => onDelete(user)}
+                />
                 <Button
                   variant="ghost"
                   size="icon"

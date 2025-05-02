@@ -16,10 +16,13 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import DialogForm from "../components/dialog-form";
 import UserForm from "./components/user-form";
+import DialogConfirm from "../components/dialog-confirm";
+import { toast } from "sonner";
 
 const UsersPage = () => {
   const { data: session, status: sessionStatus }: any = useSession();
-  const { users, loading, error, searchTerm, setSearchTerm, fetchUsers } = useUserStore();
+  const { users, loading, error, searchTerm, setSearchTerm, fetchUsers, deleteUser } =
+    useUserStore();
 
   useEffect(() => {
     if (session?.token) {
@@ -32,9 +35,18 @@ const UsersPage = () => {
     console.log("Editar usuario:", user);
   };
 
-  const handleDelete = (user: any) => {
-    // Implementar lógica de eliminación
-    console.log("Eliminar usuario:", user);
+  const handleDelete = async (user: any) => {
+    try {
+      await deleteUser(user.id, session?.token);
+      toast.success("Éxito", {
+        description: "El usuario se ha eliminado correctamente.",
+      });
+    } catch (error) {
+      console.error("Error al eliminar usuario:", error);
+      toast.error("Error", {
+        description: "No se pudo eliminar el usuario. Por favor, intente nuevamente.",
+      });
+    }
   };
 
   const handleReinvite = (user: any) => {

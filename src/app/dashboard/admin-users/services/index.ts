@@ -10,7 +10,7 @@ export const getAll = async (accessToken: string) => {
 };
 
 export const create = async (user: User, accessToken: string) => {
-  const response = await fetch(`${API_URL}/admin/users`, {
+  const response = await fetch(`${API_URL}/admin/users/invite`, {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}` },
     body: JSON.stringify(user),
