@@ -9,7 +9,7 @@ import React from "react";
 import { sidebarData } from "../data";
 import { NavGroup } from "./nav-group";
 import { ProfileDropdown } from "./profile-dropdown";
-import { Origami } from "lucide-react";
+import { PiggyBank } from "lucide-react";
 
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const { state } = useSidebar();
@@ -17,8 +17,10 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     <Sidebar collapsible="icon" variant="floating" {...props}>
       <SidebarHeader className="bg-primary text-white rounded-md rounded-b-none border-none">
         <div className="flex items-center justify-center py-2">
-          <Origami size={32} />
-          {state === "expanded" && <span className="text-white text-3xl font-black">Quironix</span>}
+          <PiggyBank size={32} />
+          {state === "expanded" && (
+            <span className="text-white text-3xl font-black ml-1">Quironix</span>
+          )}
         </div>
       </SidebarHeader>
       <SidebarContent className="bg-primary text-white">
