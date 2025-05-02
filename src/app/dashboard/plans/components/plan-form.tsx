@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,54 +7,97 @@ import { FormProvider, useForm } from "react-hook-form";
 import { FormMessage, FormControl, FormLabel, FormField, FormItem } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { create, getSystemResources } from "../services";
+import { useSession } from "next-auth/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Plan, Resource } from "../services/types";
+import { usePlanStore } from "../store/indext";
 
-const SECCIONES = [
-  "Onboarding",
-  "Usuarios y roles",
-  "Pagos y suscripciones",
-  "Gestión de tareas",
-  "Configuración de sistema",
-];
+const planFormSchema = z.object({
+  name: z.string().min(3, "Campo requerido").max(50, "Máximo 50 caracteres"),
+  monthly_price: z.any().optional(),
+  description: z.string().min(10, "Campo requerido").max(500, "Máximo 500 caracteres"),
+  system_resources: z.array(z.string()).optional(),
+  currency: z.string().optional(),
+  id: z.string().optional(),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+});
+
+type PlanFormValues = z.infer<typeof planFormSchema>;
 
 interface PlanFormProps {
-  onSubmit: (data: {
-    name: string;
-    price: string;
-    description: string;
-    secciones: string[];
-    is_default: boolean;
-  }) => void;
-  defaultValues?: {
-    name: string;
-    price: string;
-    description: string;
-    secciones: string[];
-    is_default: boolean;
-  };
+  defaultValues?: Partial<Plan>;
+  onSubmit?: (data: Plan) => Promise<void>;
 }
 
-export const PlanForm = ({ onSubmit, defaultValues }: PlanFormProps) => {
-  const form = useForm({
-    defaultValues: defaultValues || {
-      name: "",
-      price: "",
-      description: "",
-      secciones: [] as string[],
-      is_default: false,
+const PlanForm = ({ defaultValues, onSubmit }: PlanFormProps) => {
+  const [resources, setResources] = useState<Resource[]>([]);
+  const { data: session }: any = useSession();
+  const { addPlan, refreshPlans } = usePlanStore();
+
+  const form = useForm<PlanFormValues>({
+    resolver: zodResolver(planFormSchema),
+    defaultValues: {
+      name: defaultValues?.name || "",
+      monthly_price: defaultValues?.monthly_price || 0,
+      description: defaultValues?.description || "",
+      system_resources: (defaultValues?.system_resources || []).map(r =>
+        typeof r === "string" ? r : r.id
+      ),
+      currency: defaultValues?.currency || "USD",
     },
   });
 
+  useEffect(() => {
+    if (session?.token) {
+      fetchResources();
+    }
+  }, [session?.token]);
+
+  const fetchResources = async () => {
+    const resourcesData = await getSystemResources(session?.token);
+    setResources(resourcesData);
+  };
+
+  const handleSubmit = async (data: PlanFormValues): Promise<void> => {
+    try {
+      const { id, created_at, updated_at, ...restData } = data;
+      const planData = {
+        ...restData,
+        system_resources: (data.system_resources || []).map(id => ({
+          id,
+          name: resources.find(r => r.id === id)?.name || "",
+        })),
+      } as Plan;
+
+      if (onSubmit) {
+        await onSubmit(planData);
+      } else {
+        const response = await create(planData, session?.token);
+        addPlan(response);
+      }
+
+      await refreshPlans(session?.token);
+    } catch (error) {
+      console.error("Error al guardar el plan:", error);
+    }
+  };
+
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="w-full space-y-6">
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 items-start">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre del plan</FormLabel>
+                  <FormLabel>
+                    Nombre del plan<span className="text-orange-500">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="Ej: Plan básico" {...field} />
                   </FormControl>
@@ -64,12 +107,14 @@ export const PlanForm = ({ onSubmit, defaultValues }: PlanFormProps) => {
             />
             <FormField
               control={form.control}
-              name="price"
+              name="monthly_price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Precio del plan</FormLabel>
+                  <FormLabel>
+                    Precio del plan<span className="text-orange-500">*</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: 1000" {...field} />
+                    <Input type="number" placeholder="Ej: 1000" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -81,7 +126,9 @@ export const PlanForm = ({ onSubmit, defaultValues }: PlanFormProps) => {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Descripción</FormLabel>
+                <FormLabel>
+                  Descripción<span className="text-orange-500">*</span>
+                </FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Ingresa una breve descripción del plan"
@@ -98,42 +145,59 @@ export const PlanForm = ({ onSubmit, defaultValues }: PlanFormProps) => {
               Secciones<span className="text-orange-500">*</span>
             </Label>
             <div className="flex flex-col gap-2 mt-2">
-              {SECCIONES.map(sec => (
-                <label key={sec} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    value={sec}
-                    {...form.register("secciones", { required: true })}
-                  />
-                  {sec}
-                </label>
-              ))}
+              {resources.length > 0 &&
+                resources.map(resource => (
+                  <label key={resource.id} className="flex items-center gap-2">
+                    <Checkbox
+                      checked={form.watch("system_resources")?.includes(resource.id)}
+                      onCheckedChange={checked => {
+                        const currentResources = form.getValues("system_resources") || [];
+                        if (checked) {
+                          form.setValue("system_resources", [...currentResources, resource.id]);
+                        } else {
+                          form.setValue(
+                            "system_resources",
+                            currentResources.filter(id => id !== resource.id)
+                          );
+                        }
+                      }}
+                    />
+                    {resource.name}
+                  </label>
+                ))}
             </div>
-            {form.formState.errors.secciones && (
-              <span className="text-red-500 text-xs">Selecciona al menos una sección</span>
+            {form.formState.errors.system_resources && (
+              <span className="text-red-500 text-xs">
+                {form.formState.errors.system_resources.message}
+              </span>
             )}
           </div>
         </div>
-        <section className="flex items-center justify-between gap-2 w-full border-t border-orange-300 pt-4">
+        <section className="grid grid-cols-2 gap-4 border-t pt-4 border-orange-400">
           <FormField
             control={form.control}
-            name="is_default"
+            name="currency"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
                   <div className="flex items-center gap-2">
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                    <span className="text-sm">Usar este plan por defecto</span>
+                    <span className="text-sm">Moneda: {field.value}</span>
                   </div>
                 </FormControl>
               </FormItem>
             )}
           />
-          <Button type="submit" className="bg-blue-700 text-white w-1/2">
-            Guardar
+          <Button
+            type="submit"
+            className="bg-blue-700 text-white w-full"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? "Guardando..." : "Guardar"}
           </Button>
         </section>
       </form>
     </FormProvider>
   );
 };
+
+export default PlanForm;

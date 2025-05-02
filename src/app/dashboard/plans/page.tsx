@@ -1,29 +1,37 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/header";
 import { Main } from "../components/main";
 import { Button } from "@/components/ui/button";
 import TitleSection from "../components/title-section";
 import { FileText } from "lucide-react";
 import CardPlan from "@/app/dashboard/plans/components/card-plan";
-const OverviewPage = () => {
-  const plans = [
-    {
-      id: "1",
-      title: "Plan free",
-      description: "description",
-      price: "Gratis",
-      features: ["Acceso básico", "Soporte por email"],
-    },
-    {
-      id: "2",
-      title: "plan1",
-      description:
-        "lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
-      price: 100,
-      features: ["feature1", "feature2", "feature3", "feature4", "feature5", "feature6"],
-    },
-  ];
+import { Plan } from "./services/types";
+import { useSession } from "next-auth/react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getAll } from "./services";
+
+const PlansPage = () => {
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { data: session, status: sessionStatus }: any = useSession();
+
+  useEffect(() => {
+    setIsLoading(true);
+
+    if (session?.token) {
+      fetchPlans();
+    }
+  }, [sessionStatus, session]);
+
+  const fetchPlans = async () => {
+    const plansData = await getAll(session?.token);
+    setPlans(plansData);
+    setIsLoading(false);
+  };
+
+  const emptyCardsCount = plans.length < 4 ? 4 - plans.length : 0;
+
   return (
     <>
       <Header fixed>
@@ -45,14 +53,24 @@ const OverviewPage = () => {
         />
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
           <div className="w-full h-full">
-            <div className="grid grid-cols-4 gap-4">
-              {[...Array(4)].map((_, index) => (
-                <CardPlan
-                  key={plans[index]?.id || `empty-${index}`}
-                  plan={plans[index]}
-                  isEmpty={!plans[index]}
-                />
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {isLoading ? (
+                Array(4)
+                  .fill(0)
+                  .map((_, index) => (
+                    <Skeleton key={`skeleton-${index}`} className="h-[450px] w-full" />
+                  ))
+              ) : (
+                <>
+                  {plans.length > 0 && plans.map(plan => <CardPlan key={plan.id} plan={plan} />)}
+
+                  {Array(emptyCardsCount ?? 0)
+                    .fill(0)
+                    .map((_, index) => (
+                      <CardPlan key={`empty-${index}`} isEmpty={true} />
+                    ))}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -61,4 +79,4 @@ const OverviewPage = () => {
   );
 };
 
-export default OverviewPage;
+export default PlansPage;

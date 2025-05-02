@@ -56,7 +56,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     session({ session, token }: any) {
-      session.token = token.token;
+      session.token = token.session.token;
       session.iat = token.iat;
       session.exp = token.exp;
       session.jti = token.jti;

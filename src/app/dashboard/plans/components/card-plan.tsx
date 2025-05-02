@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CircleCheck, Edit, Trash2 } from "lucide-react";
@@ -12,29 +12,33 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Dialog } from "@/components/ui/dialog";
-import { PlanForm } from "./plan-form";
+import PlanForm from "./plan-form";
+import { Plan } from "../services/types";
+import { usePlanStore } from "../store/indext";
+import { useSession } from "next-auth/react";
+import { update } from "../services";
 
 interface CardPlanProps {
-  plan?: {
-    id: string;
-    title: string;
-    price: string | number;
-    description: string;
-    features: string[];
-  };
+  plan?: Plan;
   isEmpty?: boolean;
 }
 
 const CardPlan = ({ plan, isEmpty }: CardPlanProps) => {
-  const handleSubmit = (data: {
-    name: string;
-    price: string;
-    description: string;
-    secciones: string[];
-    is_default: boolean;
-  }) => {
-    // Aquí manejas el envío del formulario
-    console.log(data);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { data: session }: any = useSession();
+  const { updatePlan, refreshPlans } = usePlanStore();
+
+  const handleEdit = async (data: Plan) => {
+    try {
+      if (!plan?.id) return;
+
+      const updatedPlan = await update(plan.id, data, session?.token);
+      updatePlan(plan.id, updatedPlan);
+      await refreshPlans(session?.token);
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      console.error("Error al actualizar el plan:", error);
+    }
   };
 
   if (isEmpty || !plan) {
@@ -57,7 +61,7 @@ const CardPlan = ({ plan, isEmpty }: CardPlanProps) => {
                   Completa los campos obligatorios para crear un nuevo plan.
                 </DialogDescription>
               </DialogHeader>
-              <PlanForm onSubmit={handleSubmit} />
+              <PlanForm />
             </DialogContent>
           </Dialog>
         </CardContent>
@@ -69,9 +73,22 @@ const CardPlan = ({ plan, isEmpty }: CardPlanProps) => {
     <Card className="h-full min-h-[450px] max-h-[450px] bolder-none shadow-xl mb-10" key={plan.id}>
       <CardHeader className="m-0">
         <div className="flex items-center justify-end gap-2">
-          <Button variant="outline" size="icon">
-            <Edit className="text-primary" />
-          </Button>
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Edit className="text-primary" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px] max-h-[90%] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="font-extrabold">Editar plan</DialogTitle>
+                <DialogDescription className="text-sm">
+                  Modifica los campos que desees actualizar.
+                </DialogDescription>
+              </DialogHeader>
+              <PlanForm defaultValues={plan} onSubmit={handleEdit} />
+            </DialogContent>
+          </Dialog>
           <Button variant="outline" size="icon">
             <Trash2 className="text-primary" />
           </Button>
@@ -80,20 +97,20 @@ const CardPlan = ({ plan, isEmpty }: CardPlanProps) => {
       <CardContent className="m-0">
         <>
           <CardTitle className="text-2xl font-black text-[#FF8113] capitalize">
-            {plan.title}
+            {plan.name}
           </CardTitle>
           <CardTitle className="text-md font-extrabold text-primary uppercase">
-            {plan.price}
+            ${plan.monthly_price}
           </CardTitle>
           <CardDescription className="py-2">{plan.description}</CardDescription>
           <ul className="mt-2">
-            {plan.features.map(feature => (
+            {plan.system_resources?.map(resource => (
               <li
-                key={feature + Math.random()}
+                key={resource.id}
                 className="flex items-center justify-start gap-2 text-sm font-bold capitalize "
               >
                 <CircleCheck size={18} className="text-[#14B117]" />{" "}
-                <span className="text-[#3D4249]">{feature}</span>
+                <span className="text-[#3D4249]">{resource.name}</span>
               </li>
             ))}
           </ul>
