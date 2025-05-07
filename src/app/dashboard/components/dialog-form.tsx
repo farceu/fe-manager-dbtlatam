@@ -16,6 +16,7 @@ interface DialogFormProps<T> {
   children: ReactNode;
   trigger: ReactNode;
   onSubmit?: (data: T) => Promise<void>;
+  open?: boolean;
 }
 
 const DialogForm = <T,>({
@@ -26,9 +27,10 @@ const DialogForm = <T,>({
   children,
   trigger,
   onSubmit,
+  open,
 }: DialogFormProps<T>) => {
   return (
-    <Dialog>
+    <Dialog open={open}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>

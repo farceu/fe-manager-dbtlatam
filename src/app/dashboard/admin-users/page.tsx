@@ -99,20 +99,12 @@ const UsersPage = () => {
               </DialogForm>
             </section>
             <Card className="p-4">
-              {loading ? (
-                <div className="flex justify-center items-center h-full">
-                  <Loader className="animate-spin" />
-                </div>
-              ) : error ? (
-                <div>Error: {error}</div>
-              ) : (
-                <UsersTable
-                  users={users}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onReinvite={handleReinvite}
-                />
-              )}
+              <UsersTable
+                users={users}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onReinvite={handleReinvite}
+              />
             </Card>
           </div>
         </div>
