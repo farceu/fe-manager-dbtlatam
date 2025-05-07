@@ -37,24 +37,26 @@ export const useUserStore = create<UserStore>((set, get) => ({
   },
 
   addUser: async (user: User, accessToken: string) => {
-    set({ loading: true, error: null });
+    set({ loading: true, error: null, users: [] });
     try {
-      const newUser = await createUser(user, accessToken);
-      set(state => ({ users: [...state.users, newUser], loading: false }));
+      await createUser(user, accessToken);
     } catch (error) {
       console.error("Error al crear usuario:", error);
       set({ error: "Error al crear usuario", loading: false });
+    } finally {
+      get().fetchUsers(accessToken);
     }
   },
 
   updateUser: async (id: string, user: Partial<User>, accessToken: string) => {
     set({ loading: true, error: null });
     try {
-      const updatedUser = await update(id, user, accessToken);
-      set(state => ({ users: state.users.map(u => (u.id === id ? updatedUser : u)) }));
+      await update(id, user, accessToken);
     } catch (error) {
       console.error("Error al actualizar usuario:", error);
       set({ error: "Error al actualizar usuario", loading: false });
+    } finally {
+      get().fetchUsers(accessToken);
     }
   },
 

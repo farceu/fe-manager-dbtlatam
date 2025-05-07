@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,8 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DialogClose } from "@/components/ui/dialog";
 
 const userFormSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(3, "Campo requerido").max(50, "Máximo 50 caracteres"),
   last_name: z.string().min(3, "Campo requerido").max(50, "Máximo 50 caracteres"),
   email: z.string().email("Email inválido"),
@@ -38,14 +40,17 @@ type UserFormValues = z.infer<typeof userFormSchema>;
 interface UserFormProps {
   defaultValues?: Partial<User>;
   onSubmit?: (data: User) => Promise<void>;
+  setOpen?: Dispatch<SetStateAction<boolean>>;
 }
 
-const UserForm = ({ defaultValues, onSubmit }: UserFormProps) => {
+const UserForm = ({ defaultValues, onSubmit, setOpen }: UserFormProps) => {
   const [roles, setRoles] = useState<Role[]>([]);
   const { data: session }: any = useSession();
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
+    mode: "onChange",
     defaultValues: {
       name: defaultValues?.name || "",
       last_name: defaultValues?.last_name || "",
@@ -62,23 +67,70 @@ const UserForm = ({ defaultValues, onSubmit }: UserFormProps) => {
     }
   }, [session?.token]);
 
+  useEffect(() => {
+    if (defaultValues) {
+      console.log("Actualizando valores del formulario:", defaultValues);
+
+      // Asegurarse de que los roles sean siempre un array, incluso si vienen como undefined
+      const roles: any = Array.isArray(defaultValues.roles) ? defaultValues.roles : [];
+
+      // Actualizar los valores del formulario
+      form.reset({
+        name: defaultValues.name || "",
+        last_name: defaultValues.last_name || "",
+        email: defaultValues.email || "",
+        phone_number: defaultValues.phone_number || "",
+        type: defaultValues.type || "",
+        roles: roles.map((role: any) => role.id),
+      });
+
+      // Forzar un renderizado después de actualizar los valores
+      setTimeout(() => {
+        form.trigger(); // Esto fuerza una nueva validación y un re-renderizado
+      }, 100);
+    }
+  }, [defaultValues, form]);
+
   const fetchRoles = async () => {
-    const rolesData = await getRoles(session?.token);
-    setRoles(rolesData);
+    try {
+      const rolesData = await getRoles(session?.token);
+      setRoles(rolesData);
+    } catch (error) {
+      console.error("Error al obtener roles:", error);
+    }
   };
 
   const handleSubmit = async (data: UserFormValues): Promise<void> => {
+    setSubmitAttempted(true);
+
     try {
+      // Validar los datos antes de enviar
+      console.log("Datos recibidos en handleSubmit:", data);
+      console.log("Errores del formulario:", form.formState.errors);
+
+      // Si hay errores, no continuar
+      if (Object.keys(form.formState.errors).length > 0) {
+        console.error("Hay errores en el formulario:", form.formState.errors);
+        return;
+      }
+
       const userData = {
         ...data,
-        roles: data.roles,
+        // Asegurarse de que roles siempre sea un array
+        roles: Array.isArray(data.roles) ? data.roles : [],
       } as User;
+
+      console.log("Datos a enviar:", userData);
 
       if (onSubmit) {
         await onSubmit(userData);
+        if (setOpen) {
+          setOpen(false);
+        }
       }
     } catch (error) {
       console.error("Error al guardar el usuario:", error);
+      // No cerramos el diálogo en caso de error para permitir al usuario corregir
     }
   };
 
@@ -160,7 +212,11 @@ const UserForm = ({ defaultValues, onSubmit }: UserFormProps) => {
                 <FormLabel>
                   Tipo de usuario<span className="text-orange-500">*</span>
                 </FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || undefined}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona un tipo" />
@@ -180,38 +236,64 @@ const UserForm = ({ defaultValues, onSubmit }: UserFormProps) => {
               Roles<span className="text-orange-500">*</span>
             </Label>
             <div className="flex flex-col gap-2 mt-2">
-              {roles.map(role => (
-                <div key={`role-${role.id}`} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id={`role-checkbox-${role.id}`}
-                    checked={form.watch("roles")?.includes(role.id)}
-                    onChange={e => {
-                      const currentRoles = form.getValues("roles") || [];
-                      if (e.target.checked) {
-                        form.setValue("roles", [...currentRoles, role.id]);
-                      } else {
-                        form.setValue(
-                          "roles",
-                          currentRoles.filter(id => id !== role.id)
-                        );
-                      }
-                    }}
-                  />
-                  <label htmlFor={`role-checkbox-${role.id}`}>{role.name}</label>
-                </div>
-              ))}
+              {roles.map(role => {
+                // Verificar si el rol está seleccionado
+                const isChecked =
+                  Array.isArray(form.watch("roles")) && form.watch("roles").includes(role.id);
+
+                return (
+                  <div key={`role-${role.id}`} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={`role-checkbox-${role.id}`}
+                      checked={isChecked}
+                      onChange={e => {
+                        const currentRoles = form.getValues("roles") || [];
+                        if (e.target.checked) {
+                          form.setValue("roles", [...currentRoles, role.id], {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+                        } else {
+                          form.setValue(
+                            "roles",
+                            currentRoles.filter(id => id !== role.id),
+                            { shouldValidate: true, shouldDirty: true }
+                          );
+                        }
+                      }}
+                    />
+                    <label htmlFor={`role-checkbox-${role.id}`}>{role.name}</label>
+                  </div>
+                );
+              })}
             </div>
             {form.formState.errors.roles && (
               <span className="text-red-500 text-xs">{form.formState.errors.roles.message}</span>
             )}
           </div>
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          {submitAttempted && Object.keys(form.formState.errors).length > 0 && (
+            <div className="text-red-500 text-xs self-center mr-2">
+              Por favor, completa todos los campos requeridos
+            </div>
+          )}
+          <DialogClose asChild>
+            <Button type="button" variant="secondary">
+              Cancelar
+            </Button>
+          </DialogClose>
           <Button
             type="submit"
             className="bg-blue-700 text-white"
             disabled={form.formState.isSubmitting}
+            onClick={() => {
+              // Esto permite que se muestren los errores al hacer clic en el botón
+              if (Object.keys(form.formState.errors).length > 0) {
+                setSubmitAttempted(true);
+              }
+            }}
           >
             {form.formState.isSubmitting ? "Guardando..." : "Guardar"}
           </Button>

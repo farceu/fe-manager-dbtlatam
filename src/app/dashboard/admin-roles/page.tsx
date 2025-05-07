@@ -104,16 +104,15 @@ const RolesPage = () => {
                         </Button>
                       }
                       open={isCreateDialogOpen}
+                      onOpenChange={setIsCreateDialogOpen}
                     >
-                      <div className="p-4">
-                        <RoleForm
-                          onSubmit={data => {
-                            const roleData = data as Role;
-                            return createRole(session?.token, roleData);
-                          }}
-                          setOpen={setIsCreateDialogOpen}
-                        />
-                      </div>
+                      <RoleForm
+                        onSubmit={data => {
+                          const roleData = data as Role;
+                          return createRole(session?.token, roleData);
+                        }}
+                        setOpen={setIsCreateDialogOpen}
+                      />
                     </DialogForm>
                   </div>
                   <div className="mt-5 p-3 border border-gray-200 rounded-lg">
@@ -136,7 +135,7 @@ const RolesPage = () => {
                                   title="Editar rol"
                                   trigger={
                                     <Button
-                                      variant="outline"
+                                      variant="ghost"
                                       size="icon"
                                       onClick={() => {
                                         setEditRole(role);
@@ -160,8 +159,8 @@ const RolesPage = () => {
                                   title="¿Estas seguro que deseas eliminar este rol?"
                                   description="Esta acción no se puede deshacer."
                                   triggerButton={
-                                    <Button variant="outline" size="icon">
-                                      <Trash2 className="text-red-500" />
+                                    <Button variant="ghost" size="icon">
+                                      <Trash2 className="text-primary" />
                                     </Button>
                                   }
                                   onConfirm={() => deleteRole(session?.token, role.id || "")}

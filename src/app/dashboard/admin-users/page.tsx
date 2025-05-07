@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/header";
 import TopNav from "../components/topnav";
 import { topNav } from "../data";
@@ -18,11 +18,15 @@ import DialogForm from "../components/dialog-form";
 import UserForm from "./components/user-form";
 import DialogConfirm from "../components/dialog-confirm";
 import { toast } from "sonner";
+import { User } from "./services/types";
 
 const UsersPage = () => {
   const { data: session, status: sessionStatus }: any = useSession();
-  const { users, loading, error, searchTerm, setSearchTerm, fetchUsers, deleteUser } =
+  const { users, loading, error, searchTerm, setSearchTerm, fetchUsers, deleteUser, updateUser } =
     useUserStore();
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     if (session?.token) {
@@ -30,9 +34,27 @@ const UsersPage = () => {
     }
   }, [sessionStatus, session]);
 
-  const handleEdit = (user: any) => {
-    // Implementar lógica de edición
-    console.log("Editar usuario:", user);
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditSubmit = async (data: User): Promise<void> => {
+    try {
+      if (editingUser?.id) {
+        await updateUser(editingUser.id, data, session?.token);
+        toast.success("Éxito", {
+          description: "El usuario se ha actualizado correctamente.",
+        });
+        setIsEditDialogOpen(false);
+        setEditingUser(null);
+      }
+    } catch (error) {
+      console.error("Error al actualizar usuario:", error);
+      toast.error("Error", {
+        description: "No se pudo actualizar el usuario. Por favor, intente nuevamente.",
+      });
+    }
   };
 
   const handleDelete = async (user: any) => {
@@ -56,9 +78,17 @@ const UsersPage = () => {
 
   const handleUserSubmit = async (data: any) => {
     try {
+      console.log("Enviando datos para crear usuario:", data);
       await useUserStore.getState().addUser(data, session?.token);
-    } catch (error) {
+      toast.success("Éxito", {
+        description: "El usuario se ha creado correctamente.",
+      });
+      setIsCreateDialogOpen(false);
+    } catch (error: any) {
       console.error("Error al crear usuario:", error);
+      toast.error("Error", {
+        description: error.message || "No se pudo crear el usuario. Por favor, intente nuevamente.",
+      });
     }
   };
 
@@ -88,14 +118,18 @@ const UsersPage = () => {
               <DialogForm
                 title="Crear usuario"
                 description="Completa los campos obligatorios para crear un nuevo usuario."
-                onSubmit={handleUserSubmit}
                 trigger={
-                  <Button className="bg-orange-500 text-white hover:bg-orange-400 cursor-pointer">
+                  <Button
+                    className="bg-orange-500 text-white hover:bg-orange-400 cursor-pointer"
+                    onClick={() => setIsCreateDialogOpen(true)}
+                  >
                     <UsersIcon className="mr-2" /> Crear usuario
                   </Button>
                 }
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
               >
-                <UserForm onSubmit={handleUserSubmit} />
+                <UserForm onSubmit={handleUserSubmit} setOpen={setIsCreateDialogOpen} />
               </DialogForm>
             </section>
             <Card className="p-4">
@@ -109,6 +143,21 @@ const UsersPage = () => {
           </div>
         </div>
       </Main>
+
+      {/* Diálogo de edición */}
+      <DialogForm
+        title="Editar usuario"
+        description="Modifica los campos que desees actualizar."
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        trigger={<span />} // Elemento vacío ya que el diálogo se abre programáticamente
+      >
+        <UserForm
+          defaultValues={editingUser || undefined}
+          onSubmit={handleEditSubmit}
+          setOpen={setIsEditDialogOpen}
+        />
+      </DialogForm>
     </>
   );
 };

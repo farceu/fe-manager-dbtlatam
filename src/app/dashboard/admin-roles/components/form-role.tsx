@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DialogClose } from "@/components/ui/dialog";
 
 const roleFormSchema = z.object({
   id: z.string().optional(),
@@ -272,7 +273,12 @@ const RoleForm = ({ defaultValues, onSubmit, setOpen }: RoleFormProps) => {
             )}
           </div>
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          <DialogClose asChild>
+            <Button type="button" variant="secondary">
+              Cancelar
+            </Button>
+          </DialogClose>
           <Button
             type="submit"
             className="bg-blue-700 text-white"

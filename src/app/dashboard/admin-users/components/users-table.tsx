@@ -53,7 +53,7 @@ const UsersTable = ({ users, onEdit, onDelete, onReinvite }: UsersTableProps) =>
       </TableHeader>
       <TableBody>
         {loading ? (
-          <LoaderTable cols={7} />
+          <LoaderTable key="loader" cols={7} />
         ) : (
           filteredUsers.map(user => (
             <TableRow key={user.id}>
