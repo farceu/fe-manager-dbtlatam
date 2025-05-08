@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Header from "../components/header";
 import TopNav from "../components/topnav";
 import { topNav } from "../data";
@@ -27,9 +27,12 @@ import { Role } from "./services/types";
 import { Input } from "@/components/ui/input";
 import RoleForm from "./components/form-role";
 import DialogConfirm from "../components/dialog-confirm";
+import { useSearchParams } from "next/navigation";
 
 const RolesPage = () => {
   const { data: session }: any = useSession();
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get("search") || "";
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
   const {
@@ -41,12 +44,25 @@ const RolesPage = () => {
     deleteRole,
     setEditRole,
     editRole,
+    setSearchTerm,
   } = useRoleStore();
+
   useEffect(() => {
     if (session?.token) {
       refreshRoles(session?.token);
     }
   }, [session?.token]);
+
+  // Actualizar el searchTerm en el store cuando cambie el parámetro de búsqueda en la URL
+  useEffect(() => {
+    setSearchTerm(searchTerm);
+  }, [searchTerm, setSearchTerm]);
+
+  // Filtrar roles basados en el término de búsqueda
+  const filteredRoles = useMemo(() => {
+    if (!searchTerm) return roles;
+    return roles.filter(role => role.name?.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [roles, searchTerm]);
 
   const handleEditRole = async (data: unknown): Promise<void> => {
     const roleData = data as Role;
@@ -90,7 +106,7 @@ const RolesPage = () => {
                 </div>
                 <div className="w-2/3">
                   <div className="flex justify-between items-center">
-                    <Search placeholder="Buscar por nombre" />
+                    <Search placeholder="Buscar por nombre de rol" />
                     <DialogForm
                       title="Crear rol"
                       trigger={
@@ -124,10 +140,17 @@ const RolesPage = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
+                        {filteredRoles.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={2} className="text-center">
+                              No se encontraron roles
+                            </TableCell>
+                          </TableRow>
+                        )}
                         {isLoading ? (
                           <LoaderTable cols={2} />
                         ) : (
-                          roles.map(role => (
+                          filteredRoles.map(role => (
                             <TableRow key={role.id}>
                               <TableCell>{role.name}</TableCell>
                               <TableCell className="flex justify-end gap-2">
@@ -146,6 +169,9 @@ const RolesPage = () => {
                                     </Button>
                                   }
                                   open={editingRoleId === role.id}
+                                  onOpenChange={open => {
+                                    if (!open) setEditingRoleId(null);
+                                  }}
                                 >
                                   <div className="p-4">
                                     <RoleForm

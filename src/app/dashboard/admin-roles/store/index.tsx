@@ -8,6 +8,8 @@ interface RoleStore {
   setRoles: (roles: Role[]) => void;
   isLoading: boolean;
   editRole: Role | null;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
   setEditRole: (editRole: Role | null) => void;
   setIsLoading: (isLoading: boolean) => void;
   refreshRoles: (accessToken: string) => Promise<void>;
@@ -20,6 +22,8 @@ export const useRoleStore = createStore<RoleStore>((set, get) => ({
   roles: [],
   isLoading: true,
   editRole: null,
+  searchTerm: "",
+  setSearchTerm: (term: string) => set({ searchTerm: term }),
   setRoles: (roles: Role[]) => set({ roles }),
   setEditRole: (editRole: Role | null) => set({ editRole }),
   setIsLoading: (isLoading: boolean) => set({ isLoading }),
