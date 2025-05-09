@@ -7,7 +7,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { FormMessage, FormControl, FormLabel, FormField, FormItem } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Client } from "../services/types";
+import { ClientCreate, ClientFormData, ClientDTO } from "../services/dto";
 import { useSession } from "next-auth/react";
 import { getCountries } from "../services";
 import {
@@ -21,16 +21,6 @@ import { usePlanStore } from "../../plans/store/indext";
 import { Loader } from "lucide-react";
 import { useDashboard } from "@/stores/dashboard/dashboardStore";
 
-// Extendemos la interfaz Client para incluir los campos adicionales del formulario
-interface ClientExtended extends Client {
-  phone?: string;
-  tax_id?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  zip_code?: string;
-}
-
 const clientFormSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(3, "Campo requerido").max(100, "Máximo 100 caracteres"),
@@ -38,30 +28,19 @@ const clientFormSchema = z.object({
   plan_id: z.string().min(1, "Plan requerido"),
   terms_and_conditions: z.string().optional(),
   contract: z.string().optional(),
-  type: z
-    .enum(["FACTORING", "NORMAL", "CONFIRMING"], {
-      required_error: "Tipo de cliente requerido",
-    })
-    .default("NORMAL")
-    .optional(),
-  business_name: z.string().optional(),
+  type: z.literal("FACTORING"),
   contacts: z.object({
     first_name: z.string().min(1, "Nombre de contacto requerido"),
     last_name: z.string().min(1, "Apellido de contacto requerido"),
     email: z.string().email("Email inválido"),
   }),
-  phone: z.string().optional(),
-  tax_id: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  zip_code: z.string().optional(),
-  status: z.string().optional(),
 });
 
+type ClientFormValue = z.infer<typeof clientFormSchema>;
+
 interface ClientFormProps {
-  defaultValues?: Partial<Client>;
-  onSubmit?: (data: ClientExtended) => Promise<void>;
+  defaultValues?: ClientFormValue;
+  onSubmit?: (data: ClientCreate) => Promise<void>;
   setOpen?: (open: boolean) => void;
 }
 
@@ -106,46 +85,44 @@ const ClientForm = ({ defaultValues, onSubmit, setOpen }: ClientFormProps) => {
     fetchData();
   }, [session?.token]);
 
-  const form = useForm<ClientFormValue>({
+  const form = useForm<ClientFormData>({
     resolver: zodResolver(clientFormSchema),
-    defaultValues: {
-      type: (defaultValues?.type as "FACTORING" | "NORMAL" | "CONFIRMING") || "NORMAL",
-      business_name: defaultValues?.business_name || "",
-      country_id: defaultValues?.country_id || "",
-      plan_id: defaultValues?.plan_id || "",
-      contacts: defaultValues?.contacts?.[0] || { first_name: "", last_name: "", email: "" },
-      terms_and_conditions: defaultValues?.terms_and_conditions || "",
-      contract: defaultValues?.contract || "",
-      phone: defaultValues?.phone || "",
-      tax_id: defaultValues?.tax_id || "",
-      address: defaultValues?.address || "",
-      city: defaultValues?.city || "",
-      state: defaultValues?.state || "",
-      zip_code: defaultValues?.zip_code || "",
-      status: defaultValues?.status || "",
-    },
+    defaultValues: defaultValues
+      ? {
+          id: defaultValues.id || "",
+          name: defaultValues.name || "",
+          type: "FACTORING",
+          country_id: defaultValues.country_id || "",
+          plan_id: defaultValues.plan_id || "",
+          contacts: {
+            first_name: defaultValues.contacts.first_name || "",
+            last_name: defaultValues.contacts.last_name || "",
+            email: defaultValues.contacts.email || "",
+          },
+          terms_and_conditions: defaultValues.terms_and_conditions || "",
+          contract: defaultValues.contract || "",
+        }
+      : {
+          id: "",
+          name: "",
+          type: "FACTORING",
+          country_id: "",
+          plan_id: "",
+          contacts: {
+            first_name: "",
+            last_name: "",
+            email: "",
+          },
+          terms_and_conditions: "",
+          contract: "",
+        },
   });
 
-  const handleSubmit = async (data: ClientFormValue): Promise<void> => {
+  const handleSubmit = async (data: ClientFormData) => {
     try {
-      const clientData = {
-        name: data.name,
-        country_id: data.country_id,
-        plan_id: data.plan_id,
-        terms_and_conditions: data.terms_and_conditions,
-        contract: data.contract,
-        type: data.type,
-        contacts: data.contacts,
-      } as unknown as ClientExtended;
-
-      // Agregar el ID solo si está presente en los datos originales
-      if (defaultValues?.id) {
-        clientData.id = defaultValues.id;
-      }
-
       if (onSubmit) {
+        const clientData = ClientDTO.toAPI(data);
         await onSubmit(clientData);
-        // Cerrar el modal después de la creación exitosa
         if (setOpen) {
           setOpen(false);
         }
@@ -329,7 +306,7 @@ const ClientForm = ({ defaultValues, onSubmit, setOpen }: ClientFormProps) => {
                         <Input
                           readOnly
                           placeholder="Selecciona un archivo"
-                          value={(field.value ? "Archivo seleccionado" : "") || ""}
+                          value={field.value || ""}
                           onClick={() => document.getElementById("terms_file")?.click()}
                         />
                       </FormControl>
@@ -399,7 +376,7 @@ const ClientForm = ({ defaultValues, onSubmit, setOpen }: ClientFormProps) => {
                         <Input
                           readOnly
                           placeholder="Selecciona un archivo"
-                          value={(field.value ? "Archivo seleccionado" : "") || ""}
+                          value={field.value || ""}
                           onClick={() => document.getElementById("contract_file")?.click()}
                         />
                       </FormControl>

@@ -1,7 +1,6 @@
 import { create as createStore } from "zustand";
 import { getAll, create, update, remove } from "../services";
 import { toast } from "sonner";
-import { Client } from "../services/types";
 
 interface ClientStore {
   clients: Client[];
@@ -43,16 +42,16 @@ export const useClientStore = createStore<ClientStore>((set, get) => ({
   createClient: async (accessToken: string, client: Client) => {
     try {
       set({ isLoading: true });
-      const newClient = await create(accessToken, client);
-      set(state => ({ clients: [...state.clients, newClient] }));
-      set({ isLoading: false });
+      await create(accessToken, client);
       toast.success("Cliente creado exitosamente");
     } catch (error) {
       console.error("Error al crear el cliente:", error);
-      set({ isLoading: false });
       toast.error("Error", {
         description: "No se pudo crear el cliente. Por favor, intente nuevamente.",
       });
+    } finally {
+      set({ isLoading: false });
+      get().refreshClients(accessToken);
     }
   },
   updateClient: async (accessToken: string, clientId: string, client: Client) => {

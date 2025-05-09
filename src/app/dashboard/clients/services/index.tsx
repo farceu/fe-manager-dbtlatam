@@ -1,4 +1,4 @@
-import { Client } from "./types";
+import { ClientCreate, ClientUpdate } from "./dto";
 
 export const getAll = async (accessToken: string) => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/clients`, {
@@ -14,7 +14,7 @@ export const getAll = async (accessToken: string) => {
   return response.json();
 };
 
-export const create = async (accessToken: string, client: Client) => {
+export const create = async (accessToken: string, client: ClientCreate) => {
   // Preparar los datos para el envío según la estructura requerida por la API
   const clientData = {
     name: client.name,
@@ -26,7 +26,7 @@ export const create = async (accessToken: string, client: Client) => {
     contacts: client.contacts,
   };
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clients/create`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/clients/create`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -42,7 +42,7 @@ export const create = async (accessToken: string, client: Client) => {
   return response.json();
 };
 
-export const update = async (accessToken: string, clientId: string, client: Client) => {
+export const update = async (accessToken: string, clientId: string, client: ClientUpdate) => {
   try {
     // Preparar los datos para el envío según la estructura requerida por la API
     // Definir el tipo para evitar errores de TypeScript

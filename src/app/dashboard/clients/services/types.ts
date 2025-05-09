@@ -1,4 +1,4 @@
-interface Client {
+export interface Client {
   id: string;
   name: string;
   dni_type: null;
@@ -28,7 +28,7 @@ interface Client {
   subscriptions: Subscription[];
 }
 
-interface Subscription {
+export interface Subscription {
   id: string;
   plan_id: string;
   client_id: string;
@@ -42,7 +42,7 @@ interface Subscription {
   plan: Plan;
 }
 
-interface Plan {
+export interface Plan {
   id: string;
   name: string;
   description: string;
@@ -52,7 +52,7 @@ interface Plan {
   updated_at: string;
 }
 
-interface Country {
+export interface Country {
   id: string;
   name: string;
   iso: string;
@@ -62,7 +62,7 @@ interface Country {
   updated_at: string;
 }
 
-interface Operational {
+export interface Operational {
   id: string;
   erp_code: null;
   logo_url: null;
@@ -82,7 +82,7 @@ interface Operational {
   updated_at: string;
 }
 
-interface Contact {
+export interface Contact {
   first_name: string;
   last_name: string;
   email: string;
